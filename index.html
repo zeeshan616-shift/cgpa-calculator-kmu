@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6826984261515286" crossorigin="anonymous"></script>
 <style>
   :root{
     --ink:#16302c; --ink-soft:#4a615d; --paper:#f4f7f5; --card:#ffffff;
@@ -15,7 +17,7 @@
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  :root:not([data-theme="light"]){ }
+  :root:not([data-theme="light"]){}
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --ink:#e8f0ed; --ink-soft:#a9beb8; --paper:#0f1b19; --card:#16241f;
@@ -135,6 +137,8 @@
   .gauge-fill{position:absolute; top:0; left:0; height:100%; border-radius:4px; transition:width .3s ease, background .3s ease;}
   .gauge-labels{display:flex; justify-content:space-between; font-size:.7rem; color:var(--ink-soft); margin-top:.35rem;}
 
+  .adsense-container{margin:1.4rem 0; padding:1rem; background:var(--paper); border-radius:8px; text-align:center;}
+
   footer{margin-top:2rem; font-size:.78rem; color:var(--ink-soft);}
 </style>
 </head>
@@ -146,12 +150,27 @@
     <p class="sub">Track your semester-wise CGPA against the KMU Generic BSN course plan, and check your BMI.</p>
   </header>
 
+  <!-- AdSense Ad Unit 1 -->
+  <div class="adsense-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-6826984261515286"
+         data-ad-slot="4311810288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
   <div class="tabs" role="tablist">
     <button class="tab active" id="tab-cgpa" role="tab" aria-selected="true" onclick="showPanel('cgpa')">CGPA Calculator</button>
     <button class="tab" id="tab-bmi" role="tab" aria-selected="false" onclick="showPanel('bmi')">BMI Calculator</button>
   </div>
 
+  <!-- CGPA PANEL -->
   <section class="panel active" id="panel-cgpa">
+
     <div class="cgpa-headline">
       <div>
         <div class="cap">CGPA (average of entered semester GPAs)</div>
@@ -206,6 +225,7 @@
     </div>
   </section>
 
+  <!-- BMI PANEL -->
   <section class="panel" id="panel-bmi">
     <div class="card">
       <div class="unit-toggle">
@@ -234,10 +254,24 @@
     </div>
   </section>
 
+  <!-- AdSense Ad Unit 2 (Before Footer) -->
+  <div class="adsense-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-6826984261515286"
+         data-ad-slot="4311810288"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
   <footer>Data entered here stays only in this browser.</footer>
 </div>
 
 <script>
+// ---------- Shared ----------
 function showPanel(name){
   document.getElementById('panel-cgpa').classList.toggle('active', name==='cgpa');
   document.getElementById('panel-bmi').classList.toggle('active', name==='bmi');
@@ -247,6 +281,7 @@ function showPanel(name){
   document.getElementById('tab-bmi').setAttribute('aria-selected', name==='bmi');
 }
 
+// ---------- CGPA ----------
 const MARK_BANDS = [
   {min:90, gp:4.0, grade:"A+"},
   {min:80, gp:4.0, grade:"A"},
@@ -404,6 +439,7 @@ function updateAll(){
 
 renderSemester();
 
+// ---------- BMI ----------
 let unit = 'metric';
 function setUnits(u){
   unit = u;
@@ -449,140 +485,3 @@ function calcBMI(){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-""
