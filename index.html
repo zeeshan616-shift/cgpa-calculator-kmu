@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KMU BSN Toolkit — CGPA & BMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16302c; --ink-soft:#4a615d; --paper:#f4f7f5; --card:#ffffff;
+    --line:#d8e2de; --teal:#2c6e64; --teal-deep:#1e4d46; --sage:#8fb3a4;
+    --amber:#c98a3a; --danger:#b5533f; --focus:#2c6e64;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#e8f0ed; --ink-soft:#a9beb8; --paper:#0f1b19; --card:#16241f;
+      --line:#283833; --teal:#5fa89b; --teal-deep:#7cc0b2; --sage:#4a6b60;
+      --amber:#d9a35d; --danger:#e08672;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#e8f0ed; --ink-soft:#a9beb8; --paper:#0f1b19; --card:#16241f;
+    --line:#283833; --teal:#5fa89b; --teal-deep:#7cc0b2; --sage:#4a6b60;
+    --amber:#d9a35d; --danger:#e08672;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:2.2rem 1.25rem 4rem;}
+  header.top{border-bottom:1px solid var(--line); padding-bottom:1.4rem; margin-bottom:1.6rem;}
+  .kicker{font-size:.8rem; color:var(--teal); letter-spacing:.02em; margin:0 0 .35rem;}
+  h1{
+    font-family:'Source Serif 4',serif; font-weight:600; font-size:2rem;
+    margin:0 0 .4rem; color:var(--ink); letter-spacing:-0.01em;
+  }
+  .sub{color:var(--ink-soft); margin:0; max-width:56ch; font-size:.98rem;}
+
+  .tabs{display:flex; gap:.4rem; margin-bottom:1.6rem; border-bottom:1px solid var(--line);}
+  .tab{
+    appearance:none; border:none; background:none; cursor:pointer;
+    font-family:'IBM Plex Sans',sans-serif; font-size:.98rem; font-weight:500;
+    color:var(--ink-soft); padding:.7rem 1rem; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition:color .15s ease;
+  }
+  .tab:hover{color:var(--ink);}
+  .tab.active{color:var(--teal-deep); border-bottom-color:var(--teal);}
+  .tab:focus-visible{outline:2px solid var(--focus); outline-offset:2px; border-radius:2px;}
+
+  .panel{display:none;}
+  .panel.active{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion: reduce){ .panel.active{animation:none;} }
+
+  .row{display:flex; gap:.8rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1.2rem;}
+  label{display:block; font-size:.78rem; color:var(--ink-soft); margin-bottom:.3rem; font-weight:500;}
+  select, input[type=text], input[type=number]{
+    font-family:inherit; font-size:.95rem; color:var(--ink); background:var(--card);
+    border:1px solid var(--line); border-radius:6px; padding:.5rem .6rem; width:100%;
+  }
+  select:focus-visible, input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:1.2rem 1.3rem; margin-bottom:1.4rem;
+  }
+
+  table{width:100%; border-collapse:collapse; font-size:.92rem;}
+  thead th{
+    text-align:left; font-weight:500; color:var(--ink-soft); font-size:.75rem;
+    padding:0 .5rem .5rem 0; border-bottom:1px solid var(--line);
+  }
+  tbody td{ padding:.45rem .5rem .45rem 0; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tbody tr:last-child td{border-bottom:none;}
+  td.name-cell input{border:none; background:none; padding:.3rem 0; width:100%;}
+  td.name-cell input:focus-visible{outline:1px solid var(--teal); border-radius:4px; padding:.3rem .3rem;}
+  td.num-cell input{width:64px;}
+  .rm-btn{
+    background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:1.1rem;
+    line-height:1; padding:.2rem .35rem; border-radius:5px;
+  }
+  .rm-btn:hover{color:var(--danger); background:color-mix(in srgb, var(--danger) 12%, transparent);}
+
+  .add-row{
+    display:inline-flex; align-items:center; gap:.4rem; margin-top:.7rem;
+    background:none; border:1px dashed var(--line); color:var(--teal-deep);
+    font-family:inherit; font-size:.85rem; font-weight:500; padding:.45rem .7rem;
+    border-radius:6px; cursor:pointer;
+  }
+  .add-row:hover{border-color:var(--teal); background:color-mix(in srgb, var(--teal) 8%, transparent);}
+
+  .summary{
+    display:flex; justify-content:space-between; align-items:baseline;
+    border-top:1px solid var(--line); margin-top:1.4rem; padding-top:1.1rem;
+  }
+  .summary .label{font-size:.82rem; color:var(--ink-soft);}
+  .summary .value{font-family:'Source Serif 4',serif; font-size:1.6rem; color:var(--teal-deep); font-variant-numeric:tabular-nums;}
+
+  .ledger{margin-top:1.4rem;}
+  .ledger h3{font-size:.85rem; font-weight:500; color:var(--ink-soft); margin:0 0 .6rem;}
+  .ledger table td, .ledger table th{padding:.4rem .5rem;}
+  .ledger .gpa-cell{font-variant-numeric:tabular-nums; color:var(--teal-deep); font-weight:600;}
+
+  .cgpa-headline{
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    background:linear-gradient(135deg, color-mix(in srgb, var(--teal) 10%, var(--card)), var(--card));
+    border:1px solid var(--line); border-radius:10px; padding:1.3rem 1.4rem; margin-bottom:1.4rem;
+  }
+  .cgpa-headline .num{font-family:'Source Serif 4',serif; font-size:2.6rem; color:var(--teal-deep); font-variant-numeric:tabular-nums;}
+  .cgpa-headline .cap{font-size:.78rem; color:var(--ink-soft);}
+
+  .note{font-size:.82rem; color:var(--ink-soft); border-left:2px solid var(--sage); padding-left:.7rem; margin-top:1rem;}
+
+  .bmi-grid{display:grid; grid-template-columns:1fr 1fr; gap:.9rem;}
+  @media (max-width:480px){.bmi-grid{grid-template-columns:1fr;}}
+  .unit-toggle{display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; width:fit-content; margin-bottom:1rem;}
+  .unit-toggle button{
+    border:none; background:var(--card); color:var(--ink-soft); font-family:inherit;
+    font-size:.82rem; padding:.4rem .8rem; cursor:pointer;
+  }
+  .unit-toggle button.on{background:var(--teal); color:#fff;}
+
+  .bmi-result{margin-top:1.4rem; padding-top:1.2rem; border-top:1px solid var(--line);}
+  .bmi-num{font-family:'Source Serif 4',serif; font-size:2.6rem; color:var(--teal-deep); font-variant-numeric:tabular-nums;}
+  .bmi-cat{font-size:1rem; font-weight:500; margin-top:.2rem;}
+  .gauge{height:8px; border-radius:4px; background:var(--line); margin-top:.9rem; position:relative; overflow:hidden;}
+  .gauge-fill{position:absolute; top:0; left:0; height:100%; border-radius:4px; transition:width .3s ease, background .3s ease;}
+  .gauge-labels{display:flex; justify-content:space-between; font-size:.7rem; color:var(--ink-soft); margin-top:.35rem;}
+
+  footer{margin-top:2rem; font-size:.78rem; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Buner College of Nursing &amp; Health Sciences · KMU-affiliated</p>
+    <h1>BSN Student Toolkit</h1>
+    <p class="sub">Track your semester-wise CGPA against the KMU Generic BSN course plan, and check your BMI.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" id="tab-cgpa" role="tab" aria-selected="true" onclick="showPanel('cgpa')">CGPA Calculator</button>
+    <button class="tab" id="tab-bmi" role="tab" aria-selected="false" onclick="showPanel('bmi')">BMI Calculator</button>
+  </div>
+
+  <section class="panel active" id="panel-cgpa">
+    <div class="cgpa-headline">
+      <div>
+        <div class="cap">CGPA (average of entered semester GPAs)</div>
+        <div class="num" id="cgpaOut">0.00</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cap">Total credit hours</div>
+        <div class="num" id="creditsOut" style="font-size:1.6rem;">0</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div style="flex:1; min-width:160px;">
+          <label for="semSelect">Semester</label>
+          <select id="semSelect" onchange="renderSemester()"></select>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+      <table id="courseTable">
+        <thead>
+          <tr>
+            <th style="width:26%;">Course</th>
+            <th>Theory<br>credit hrs</th>
+            <th>Theory<br>marks (/100)</th>
+            <th>OSPE<br>credit hrs</th>
+            <th>OSPE<br>marks (/100)</th>
+            <th>GP</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="courseBody"></tbody>
+      </table>
+      </div>
+      <button class="add-row" onclick="addCourse()">+ Add course</button>
+
+      <div class="summary">
+        <span class="label">This semester's GPA</span>
+        <span class="value" id="semGpaOut">0.00</span>
+      </div>
+
+      <p class="note">Course lists reflect the general KMU Generic BSN plan; credit hours are editable defaults — confirm them against your own course outline before relying on the total. Leave OSPE credit hours at 0 for courses with no practical/OSPE component. Marks are converted to Grade Points on KMU's own scale: 90–100 = A+ (4.0), 80–89 = A (4.0), 75–79 = B+ (3.5), 70–74 = B (3.0), 64–69 = C+ (2.5), 60–63 = C (2.0), below 60 = F (0.0) — KMU's semester system requires at least 60% to pass a course. A course's GP blends theory and OSPE by their credit-hour weight.</p>
+    </div>
+
+    <div class="ledger">
+      <h3>Semester record</h3>
+      <table>
+        <thead><tr><th>Semester</th><th>Credit hrs</th><th>GPA</th></tr></thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-bmi">
+    <div class="card">
+      <div class="unit-toggle">
+        <button id="uMetric" class="on" onclick="setUnits('metric')">cm / kg</button>
+        <button id="uImperial" onclick="setUnits('imperial')">ft-in / lb</button>
+      </div>
+
+      <div class="bmi-grid">
+        <div>
+          <label id="heightLabel" for="heightIn">Height (cm)</label>
+          <input type="number" id="heightIn" placeholder="e.g. 165" oninput="calcBMI()">
+        </div>
+        <div>
+          <label id="weightLabel" for="weightIn">Weight (kg)</label>
+          <input type="number" id="weightIn" placeholder="e.g. 58" oninput="calcBMI()">
+        </div>
+      </div>
+
+      <div class="bmi-result">
+        <div class="bmi-num" id="bmiNum">—</div>
+        <div class="bmi-cat" id="bmiCat">Enter your height and weight</div>
+        <div class="gauge"><div class="gauge-fill" id="gaugeFill" style="width:0%; background:var(--sage);"></div></div>
+        <div class="gauge-labels"><span>Under</span><span>Normal</span><span>Over</span><span>Obese</span></div>
+      </div>
+      <p class="note">BMI is a general screening measure, not a medical diagnosis. For a full picture, discuss results with a qualified clinician.</p>
+    </div>
+  </section>
+
+  <footer>Data entered here stays only in this browser.</footer>
+</div>
+
+<script>
+function showPanel(name){
+  document.getElementById('panel-cgpa').classList.toggle('active', name==='cgpa');
+  document.getElementById('panel-bmi').classList.toggle('active', name==='bmi');
+  document.getElementById('tab-cgpa').classList.toggle('active', name==='cgpa');
+  document.getElementById('tab-bmi').classList.toggle('active', name==='bmi');
+  document.getElementById('tab-cgpa').setAttribute('aria-selected', name==='cgpa');
+  document.getElementById('tab-bmi').setAttribute('aria-selected', name==='bmi');
+}
+
+const MARK_BANDS = [
+  {min:90, gp:4.0, grade:"A+"},
+  {min:80, gp:4.0, grade:"A"},
+  {min:75, gp:3.5, grade:"B+"},
+  {min:70, gp:3.0, grade:"B"},
+  {min:64, gp:2.5, grade:"C+"},
+  {min:60, gp:2.0, grade:"C"},
+  {min:0,  gp:0.0, grade:"F"}
+];
+function marksToGP(marks){
+  const m = Math.max(0, Math.min(100, parseFloat(marks)||0));
+  const band = MARK_BANDS.find(b => m >= b.min);
+  return band ? band.gp : 0;
+}
+function marksToGrade(marks){
+  const m = Math.max(0, Math.min(100, parseFloat(marks)||0));
+  const band = MARK_BANDS.find(b => m >= b.min);
+  return band ? band.grade : "F";
+}
+const defaultCourses = {
+  1: ["Fundamentals of Nursing-I","Microbiology","Anatomy & Physiology-I","Computer Skills","English-I","Biochemistry for Nurses"],
+  2: ["Fundamentals of Nursing-II","Anatomy & Physiology-II","Community Health Nursing-I","Applied Nutrition","English-II","Islamiat","Pakistan Studies"],
+  3: ["Adult Health Nursing-I","Pathophysiology-I","Health Assessment-I","Pharmacology-I","Mathematics","English-III"],
+  4: ["Adult Health Nursing-II","Pathophysiology-II","Health Assessment-II","Developmental Psychology","Pharmacology-II","English-IV","Nursing Ethics"],
+  5: [],
+  6: ["Mental Health Nursing","Intro to Biostatistics","Behavioural Psychology","Epidemiology","English-VI (Academic Writing)","Culture, Health and Society"],
+  7: [],
+  8: ["Community Health Nursing-III"]
+};
+
+let state = loadState();
+function loadState(){
+  try{
+    const raw = localStorage.getItem('kmu_cgpa_state');
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  const s = {};
+  for(let i=1;i<=8;i++){
+    s[i] = defaultCourses[i].map(name => ({name, credits:3, marks:75, ospeCredits:0, ospeMarks:75}));
+  }
+  return s;
+}
+function saveState(){
+  try{ localStorage.setItem('kmu_cgpa_state', JSON.stringify(state)); }catch(e){}
+}
+
+const semSelect = document.getElementById('semSelect');
+for(let i=1;i<=8;i++){
+  const o = document.createElement('option'); o.value=i; o.textContent = "Semester "+i;
+  semSelect.appendChild(o);
+}
+let currentSem = 1;
+
+function renderSemester(){
+  currentSem = parseInt(semSelect.value || 1);
+  const body = document.getElementById('courseBody');
+  body.innerHTML = '';
+  (state[currentSem]||[]).forEach((c, idx) => {
+    body.appendChild(courseRow(c, idx));
+  });
+  updateAll();
+}
+
+function courseGP(c){
+  const cr = parseFloat(c.credits)||0;
+  const ocr = parseFloat(c.ospeCredits)||0;
+  const totalCr = cr + ocr;
+  if(!totalCr) return 0;
+  const pts = cr*marksToGP(c.marks) + ocr*marksToGP(c.ospeMarks);
+  return pts/totalCr;
+}
+
+function courseRow(c, idx){
+  const tr = document.createElement('tr');
+
+  const tdName = document.createElement('td'); tdName.className='name-cell';
+  const nameInput = document.createElement('input'); nameInput.type='text'; nameInput.value=c.name; nameInput.placeholder='Course name';
+  nameInput.oninput = ()=>{ state[currentSem][idx].name = nameInput.value; saveState(); };
+  tdName.appendChild(nameInput);
+
+  const tdCred = document.createElement('td'); tdCred.className='num-cell';
+  const credInput = document.createElement('input'); credInput.type='number'; credInput.min=0; credInput.step=1; credInput.value=c.credits;
+  credInput.oninput = ()=>{ state[currentSem][idx].credits = parseFloat(credInput.value)||0; saveState(); refreshGP(); updateAll(); };
+  tdCred.appendChild(credInput);
+
+  const tdMarks = document.createElement('td'); tdMarks.className='num-cell';
+  const marksInput = document.createElement('input'); marksInput.type='number'; marksInput.min=0; marksInput.max=100; marksInput.step=1; marksInput.value=c.marks;
+  marksInput.oninput = ()=>{ state[currentSem][idx].marks = parseFloat(marksInput.value)||0; saveState(); refreshGP(); updateAll(); };
+  tdMarks.appendChild(marksInput);
+
+  const tdOspeCred = document.createElement('td'); tdOspeCred.className='num-cell';
+  const ospeCredInput = document.createElement('input'); ospeCredInput.type='number'; ospeCredInput.min=0; ospeCredInput.step=1; ospeCredInput.value=c.ospeCredits||0;
+  ospeCredInput.oninput = ()=>{ state[currentSem][idx].ospeCredits = parseFloat(ospeCredInput.value)||0; saveState(); refreshGP(); updateAll(); };
+  tdOspeCred.appendChild(ospeCredInput);
+
+  const tdOspeMarks = document.createElement('td'); tdOspeMarks.className='num-cell';
+  const ospeMarksInput = document.createElement('input'); ospeMarksInput.type='number'; ospeMarksInput.min=0; ospeMarksInput.max=100; ospeMarksInput.step=1; ospeMarksInput.value=c.ospeMarks||0;
+  ospeMarksInput.oninput = ()=>{ state[currentSem][idx].ospeMarks = parseFloat(ospeMarksInput.value)||0; saveState(); refreshGP(); updateAll(); };
+  tdOspeMarks.appendChild(ospeMarksInput);
+
+  const tdGP = document.createElement('td');
+  const gpSpan = document.createElement('span');
+  gpSpan.style.color = 'var(--teal-deep)'; gpSpan.style.fontWeight='600'; gpSpan.style.fontVariantNumeric = 'tabular-nums';
+  gpSpan.textContent = courseGP(c).toFixed(2);
+  tdGP.appendChild(gpSpan);
+  function refreshGP(){ gpSpan.textContent = courseGP(state[currentSem][idx]).toFixed(2); }
+
+  const tdRm = document.createElement('td');
+  const rm = document.createElement('button'); rm.className='rm-btn'; rm.innerHTML='&times;'; rm.title='Remove course';
+  rm.onclick = ()=>{ state[currentSem].splice(idx,1); saveState(); renderSemester(); };
+  tdRm.appendChild(rm);
+
+  tr.append(tdName, tdCred, tdMarks, tdOspeCred, tdOspeMarks, tdGP, tdRm);
+  return tr;
+}
+
+function addCourse(){
+  if(!state[currentSem]) state[currentSem] = [];
+  state[currentSem].push({name:"", credits:3, marks:75, ospeCredits:0, ospeMarks:75});
+  saveState();
+  renderSemester();
+}
+
+function semesterStats(sem){
+  const list = state[sem]||[];
+  let credits=0, points=0;
+  list.forEach(c=>{
+    const cr = parseFloat(c.credits)||0;
+    const ocr = parseFloat(c.ospeCredits)||0;
+    credits += cr + ocr;
+    points += cr*marksToGP(c.marks) + ocr*marksToGP(c.ospeMarks);
+  });
+  return {credits, gpa: credits ? points/credits : 0};
+}
+
+function updateAll(){
+  const s = semesterStats(currentSem);
+  document.getElementById('semGpaOut').textContent = s.gpa.toFixed(2);
+
+  let totalCredits=0, gpaSum=0, semCount=0;
+  const ledgerBody = document.getElementById('ledgerBody');
+  ledgerBody.innerHTML = '';
+  for(let i=1;i<=8;i++){
+    const st = semesterStats(i);
+    if(st.credits>0){
+      totalCredits += st.credits; gpaSum += st.gpa; semCount += 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>Semester ${i}</td><td>${st.credits}</td><td class="gpa-cell">${st.gpa.toFixed(2)}</td>`;
+      ledgerBody.appendChild(tr);
+    }
+  }
+  document.getElementById('cgpaOut').textContent = semCount ? (gpaSum/semCount).toFixed(2) : "0.00";
+  document.getElementById('creditsOut').textContent = totalCredits;
+}
+
+renderSemester();
+
+let unit = 'metric';
+function setUnits(u){
+  unit = u;
+  document.getElementById('uMetric').classList.toggle('on', u==='metric');
+  document.getElementById('uImperial').classList.toggle('on', u==='imperial');
+  document.getElementById('heightLabel').textContent = u==='metric' ? 'Height (cm)' : 'Height (ft-in, e.g. 5.6)';
+  document.getElementById('weightLabel').textContent = u==='metric' ? 'Weight (kg)' : 'Weight (lb)';
+  document.getElementById('heightIn').value = '';
+  document.getElementById('weightIn').value = '';
+  calcBMI();
+}
+function calcBMI(){
+  const h = parseFloat(document.getElementById('heightIn').value);
+  const w = parseFloat(document.getElementById('weightIn').value);
+  const out = document.getElementById('bmiNum');
+  const cat = document.getElementById('bmiCat');
+  const fill = document.getElementById('gaugeFill');
+  if(!h || !w || h<=0 || w<=0){
+    out.textContent = '—'; cat.textContent = 'Enter your height and weight';
+    fill.style.width='0%'; return;
+  }
+  let heightM, weightKg;
+  if(unit==='metric'){
+    heightM = h/100; weightKg = w;
+  } else {
+    const feet = Math.floor(h); const inches = Math.round((h-feet)*10);
+    heightM = ((feet*12)+inches) * 0.0254;
+    weightKg = w * 0.453592;
+  }
+  const bmi = weightKg / (heightM*heightM);
+  out.textContent = bmi.toFixed(1);
+
+  let label, color, pct;
+  if(bmi < 18.5){ label='Underweight'; color='#c98a3a'; pct = Math.min(bmi/18.5*25,25); }
+  else if(bmi < 25){ label='Normal weight'; color='#2c6e64'; pct = 25 + (bmi-18.5)/(25-18.5)*25; }
+  else if(bmi < 30){ label='Overweight'; color='#c98a3a'; pct = 50 + (bmi-25)/(30-25)*25; }
+  else { label='Obese'; color='#b5533f'; pct = Math.min(75 + (bmi-30)/10*25, 100); }
+  cat.textContent = label;
+  cat.style.color = color;
+  fill.style.width = pct+'%';
+  fill.style.background = color;
+}
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+""

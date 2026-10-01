@@ -1,0 +1,13 @@
+# Created by GitHub Copilot
+
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+
+# OS-generated files
+*.swp
+*.swo
